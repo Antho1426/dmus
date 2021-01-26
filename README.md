@@ -37,6 +37,7 @@ Important point to notice:
   `dm` hotkey in the Alfred search bar. The `dmus.py` Python program is then
   automatically triggered and runs in the background.
   
+<img src="dmus.gif" alt="dmus-gif" style="width: 640px;"/>
   
 ## 2. Getting started
 
