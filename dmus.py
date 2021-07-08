@@ -22,7 +22,7 @@ os.chdir(project_path) # setting the current working directory based on the path
 import glob
 import os.path
 import platform
-import youtube_dl # version 2021.1.16 (i.e. the latest version of youtube_dl at the time of the development of this software) (simply reinstall youtube_dl to make sure to have the latest version: "pip uninstall youtube_dl" and then "pip install youtube_dl") (or install the specific youtube_dl version using "pip install 'youtube_dl==2021.1.16' --force-reinstall" (cf.: "Installing specific package versions with pip", https://stackoverflow.com/questions/5226311/installing-specific-package-versions-with-pip))
+import osascript
 import applescript # (pip install applescript)
 import moviepy.editor # for extracting ".mp3" audio file from ".mp4" video file
 from pathlib import Path # for eventually getting the parent directory of the video file from which to extract the audio
@@ -40,6 +40,11 @@ DOWNLOAD_DIRECTORY = '/Users/anthony/Downloads' # name of the folder in which we
 
 # Moving to the "Downloads" directory
 os.chdir(DOWNLOAD_DIRECTORY)
+
+# Sound paths
+sound_path_start = '/System/Library/Sounds/Blow.aiff'
+sound_path_success = '/System/Library/Sounds/Hero.aiff'
+sound_path_fail = '/System/Library/Sounds/Sosumi.aiff'
 
 
 ## Parsing the input argument
@@ -71,6 +76,7 @@ if argsVid == 'video information required':
     # ✅ URL of YouTube video
     #argsVid = 'https://www.youtube.com/watch?v=A_H8t0OqyQ0'
     # ✅ URL of YouTube video presenting encoding problem for writing metadata ("UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position 26: ordinal not in range(128)")
+    # (YouTube video called "MØ - When I Was Young (Lyrics _ Lyric Video)")
     argsVid = 'https://www.youtube.com/watch?v=FVGXaglgCVk'
     # ✅ URL of YouTube video that is NO MORE available
     #argsVid = 'https://youtu.be/UjrlC9mGCD'
@@ -108,20 +114,9 @@ def audio_downloader(url):
     # Getting the number of ".mp3" files preliminarily (i.e. before downloading the ".mp3" audio file(s)) situated in the DOWNLOAD_DIRECTORY
     number_mp3_DOWNLOAD_DIRECTORY_before_download = len(glob.glob1(DOWNLOAD_DIRECTORY, "*.mp3"))
 
-    ydl_opts = {
-        'format': 'mp4',
-        'quiet': True,
-        #--- /!\ Uncommenting the below option lines allow to directly retrieve the ".mp3" file with youtube-dl!
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }]
-        #---
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        returned_value = ydl.download([url]) # downloading the audio
-        print(' returned_value: {0}'.format(returned_value))
+    command = 'youtube-dl --extract-audio --audio-format mp3 ' + url
+    returned_value = os.system(command)
+    print("youtube_dl returned_value: ", returned_value) # prints "0" (this means that the command run successfully)
 
     # Getting the number of ".mp3" files situated in the DOWNLOAD_DIRECTORY after downloading the ".mp3" audio file(s)
     number_mp3_DOWNLOAD_DIRECTORY_after_download = len(glob.glob1(DOWNLOAD_DIRECTORY, "*.mp3"))
@@ -235,6 +230,13 @@ def notify(title, subtitle, message, sound_path):
 
 ## Main process
 
+# Launching initial notification
+notify(title='dmus.py',
+       subtitle='Running dmus.py script to extract audio',
+       message='Audio extraction process started...',
+       sound_path=sound_path_start)
+
+
 if argsVid == 'clipboard': # this is True (i.e. argsVid == 'clipboard') only if debugModeOn is set to "False"
     # 1) Retrieving stored clipboard value
     print('\n1) Retrieving stored clipboard value')
@@ -261,9 +263,11 @@ if os.path.isfile(clipboard_value): # checking if the file exists on the compute
     print('4) Posting macOS X notification')
     parent_directory = Path(video_file_path).parent
     notify(title='dmus.py',
-           subtitle='Audio file extracted ✅',
+           subtitle='Audio file extracted :-)',
            message='The ".mp3" audio file is available in {0}'.format(parent_directory),
-           sound_path=project_path + "/Hero.wav")
+           sound_path=sound_path_success)
+    # Exiting the iTerm2 window
+    osascript.run('tell application "iTerm2" to close first window')
 
 # URL case
 elif checkers.is_url(clipboard_value): # checking the validity of the URL (cf.: https://validator-collection.readthedocs.io/en/latest/checkers.html)
@@ -283,7 +287,9 @@ elif checkers.is_url(clipboard_value): # checking the validity of the URL (cf.: 
         notify(title='dmus.py',
                subtitle='Audio download using youtube_dl failed :-(',
                message='Make sure you are connected to Internet!',
-               sound_path=project_path + "/Sosumi.aiff")
+               sound_path=sound_path_fail)
+        # Exiting the iTerm2 window
+        osascript.run('tell application "iTerm2" to close first window')
         # Exiting the program
         exit(1)
     if returned_value != 0:
@@ -293,7 +299,9 @@ elif checkers.is_url(clipboard_value): # checking the validity of the URL (cf.: 
         notify(title='dmus.py',
                subtitle='Audio download using youtube_dl failed :-(',
                message='Make sure you are connected to Internet!',
-               sound_path=project_path + "/Sosumi.aiff")
+               sound_path=sound_path_fail)
+        # Exiting the iTerm2 window
+        osascript.run('tell application "iTerm2" to close first window')
         # Exiting the program
         exit(1)
 
@@ -318,7 +326,11 @@ elif checkers.is_url(clipboard_value): # checking the validity of the URL (cf.: 
     notify(title='dmus.py',
            subtitle=subtitle,
            message=message,
-           sound_path=project_path + "/Hero.wav")
+           sound_path=sound_path_success)
+    # Exiting the iTerm2 window
+    osascript.run('tell application "iTerm2" to close first window')
+    # Exiting the program
+    exit(1)
 
 # UNIDENTIFIED case
 else:
@@ -329,7 +341,8 @@ else:
     notify(title='dmus.py',
            subtitle='Audio file extraction failed :-(',
            message='Invalid video path or URL...',
-           sound_path=project_path + "/Sosumi.aiff")
-
+           sound_path=sound_path_fail)
+    # Exiting the iTerm2 window
+    osascript.run('tell application "iTerm2" to close first window')
     # Exiting the program
     exit(1)
