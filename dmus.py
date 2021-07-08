@@ -7,7 +7,7 @@
 
 
 #==================
-debugModeOn = True
+debugModeOn = False
 #==================
 
 
