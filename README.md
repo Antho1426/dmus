@@ -16,9 +16,9 @@ argument.
 ## 1. Description
 `dmus.py` is a Python program that allows to extract the audio file of a video
 providing either the video URL or the video absolute file path.
-The software leverages the `youtube_dl` Python package. It might work with
-pretty much all kind of platforms, but currently supports videos hosted on at
-least following platforms:
+The software leverages `youtube-dl` (the open-source download manager for video
+and audio from YouTube). It might work with pretty much all kind of platforms,
+but currently supports videos hosted on at least following platforms:
 - YouTube
 - Instagram
 
@@ -35,14 +35,14 @@ Important point to notice:
   installing the [Alfred macOS app](https://www.alfredapp.com) and the `DownMus`
   workflow, simply copy a video path or URL to the clipboard and then type the
   `dm` hotkey in the Alfred search bar. The `dmus.py` Python program is then
-  automatically triggered and runs in the background.
+  automatically triggered and runs in iTerm2.
   
 <img src="dmus.gif" alt="dmus-gif" style="width: 640px;"/>
-  
+
 ## 2. Getting started
 
 ### 2.1 Dependencies
-* Tested on macOS Big Sur version 11.0.1
+* Tested on macOS Big Sur version 11.4
 * Python 2.7
 
 ### 2.2 Installing
