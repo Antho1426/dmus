@@ -37,7 +37,9 @@ Important point to notice:
   `dm` hotkey in the Alfred search bar. The `dmus.py` Python program is then
   automatically triggered and runs in iTerm2.
   
-<img src="dmus.gif" alt="dmus-gif" style="width: 640px;"/>
+<p align="center">
+	<img src="dmus.gif" alt="dmus-gif" style="width: 640px;"/>
+</p>
 
 ## 2. Getting started
 
