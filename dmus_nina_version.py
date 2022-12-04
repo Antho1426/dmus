@@ -18,6 +18,9 @@ os.getcwd() # printing the path leading to the current working directory
 os.chdir(project_path) # setting the current working directory based on the path leading to the current working directory
 
 
+os.environ["FFMPEG_BINARY"] = "/usr/local/bin/ffmpeg"  # cf. "StackOverflow - ffmpeg installation on macOS for MoviePy fails with SSL error" (https://stackoverflow.com/questions/45467234/ffmpeg-installation-on-macos-for-moviepy-fails-with-ssl-error)
+
+
 ## Required packages
 import glob
 import os.path
@@ -29,14 +32,18 @@ from pathlib import Path # for eventually getting the parent directory of the vi
 from termcolor import colored # (pip install termcolor)
 from playsound import playsound # for playing the notification sound
 from argparse import ArgumentParser
-from validator_collection import checkers # to validate URLs (pip install validator-collection)
-from pandas.io.clipboard import clipboard_get # to access the string situated in the clipboard
+#from validator_collection import checkers # to validate URLs (pip install validator-collection)
+try:
+    from urllib.parse import urlparse
+except ImportError:
+     from urlparse import urlparse
+from pandas.io.clipboard import clipboard_get # to access the string situated in the clipboard (pip install pandas)
 
 
 ## Configurations
 
 # Setting the DOWNLOAD_DIRECTORY
-DOWNLOAD_DIRECTORY = '/Users/anthony/Downloads' # name of the folder in which we will put the downloaded audio file(s) (this can be adjusted by the user)
+DOWNLOAD_DIRECTORY = '/Users/ninapaudex/Downloads' # name of the folder in which we will put the downloaded audio file(s) (this can be adjusted by the user)
 
 # Moving to the "Downloads" directory
 os.chdir(DOWNLOAD_DIRECTORY)
@@ -92,6 +99,18 @@ if argsVid == 'video information required':
 
 
 ## Functions
+
+def is_url(url):
+    """
+    Function to determine if string is a valid URL
+    (Cf. "StackOverflow - How to validate a url in Python? (Malformed or not)" (https://stackoverflow.com/questions/7160737/how-to-validate-a-url-in-python-malformed-or-not))
+    """
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
 
 def audio_downloader(url):
     """
@@ -270,7 +289,8 @@ if os.path.isfile(clipboard_value): # checking if the file exists on the compute
     osascript.run('tell application "iTerm2" to close first window')
 
 # URL case
-elif checkers.is_url(clipboard_value): # checking the validity of the URL (cf.: https://validator-collection.readthedocs.io/en/latest/checkers.html)
+#elif checkers.is_url(clipboard_value): # checking the validity of the URL (cf.: https://validator-collection.readthedocs.io/en/latest/checkers.html)
+elif is_url(clipboard_value):
     url = clipboard_value
     print(' ✅ Validity of video URL approved!')
     returned_value = 0
